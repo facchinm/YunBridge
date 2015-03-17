@@ -86,6 +86,14 @@ def send(index, msg):
   crc.write_crc()          # CRC
   stdout.flush()
 
+class PING_Command:
+  def __init__(self, reader):
+    self.reader = reader
+
+  def run(self, data):
+    if data[0] == 'I':
+      return chr(2)
+    return chr(0)
 
 class RESET_Command:
   def __init__(self, reader):
@@ -107,6 +115,7 @@ class PacketReader:
     self.last_response = None
     self.processor = processor
     self.processor.register('X', RESET_Command(self))
+    self.processor.register('Q', PING_Command(self))
       
   # Timed read
   def t_read(self):
