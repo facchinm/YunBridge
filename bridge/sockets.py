@@ -28,7 +28,7 @@
 from socket import AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SO_ERROR
 from socket import gethostname
 from select import select
-import utils, socket
+import utils, socket, ssl
 
 
 class SocketClient:
@@ -37,18 +37,31 @@ class SocketClient:
     self.rxbuff = ''
     self.connecting = False
     self.connected = False
+    self.isSSL = False
+    self.context = ssl.create_default_context()
+    self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    self.context.verify_mode = ssl.CERT_REQUIRED
+    self.context.check_hostname = True
+    self.context.load_verify_locations("/root/ca-bundle.crt")
 
   def set_sock(self, sock):
     self.sock = sock
     self.connected = True
 
   def connect(self, address, port):
-    self.sock = socket.socket(AF_INET, SOCK_STREAM)
-    self.sock.setblocking(0)
-    try:
-      self.sock.connect((address, port))
-    except socket.error, e:
-      pass
+    if port == 443:
+      self.sock = socket.socket(AF_INET, SOCK_STREAM)
+      self.conn = self.context.wrap_socket(self.sock, server_hostname=address)
+      self.conn.connect((address, 443))
+      self.isSSL = True
+    else:
+      self.sock = socket.socket(AF_INET, SOCK_STREAM)
+      self.sock.setblocking(0)
+      self.isSSL = False
+      try:
+        self.sock.connect((address, port))
+      except socket.error, e:
+        pass
     self.connecting = True
 
   def run(self):
@@ -77,7 +90,10 @@ class SocketClient:
     if len(rd) > 0:
       if len(self.rxbuff)<1024:
         try:
-          chunk = self.sock.recv(1024)
+          if self.isSSL:
+            chunk = self.conn.recv(1024)
+          else:
+            chunk = self.sock.recv(1024)
         except:
           self.close()
           return
@@ -89,7 +105,10 @@ class SocketClient:
     # send data to socket
     if len(wr) > 0:
       if len(self.txbuff) > 0:
-        sent = self.sock.send(self.txbuff)
+        if self.isSSL:
+          sent = self.conn.sendall(self.txbuff)
+        else:
+          sent = self.sock.send(self.txbuff)
         self.txbuff = self.txbuff[sent:]
 
   def recv(self, maxlen):
