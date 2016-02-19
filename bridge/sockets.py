@@ -42,7 +42,7 @@ class SocketClient:
     self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
     self.context.verify_mode = ssl.CERT_REQUIRED
     self.context.check_hostname = True
-    self.context.load_verify_locations("/root/ca-bundle.crt")
+    self.context.load_verify_locations(None, "/etc/ssl/certs/")
 
   def set_sock(self, sock):
     self.sock = sock
