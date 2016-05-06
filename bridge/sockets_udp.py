@@ -48,7 +48,7 @@ class UDPSocket:
     try:
       self.sock.bind((address, port))
       self.opened = True
-    except socket.error, e:
+    except socket.error:
       pass
 
   def run(self):
@@ -73,7 +73,7 @@ class UDPSocket:
       if len(self.txbuff) > 0:
         try:
           self.sock.sendto(self.txbuff.pop(0), self.txmeta.pop(0))
-        except socket.error, e:
+        except socket.error:
           pass
 
   def recv_next(self):
@@ -317,7 +317,7 @@ def test():
     r = udp.recv_next()
     if r != None:
       addr, port = udp.recv_address()
-      print "RECEIVED " + str(r) + " " + addr + ":" + str(port)
+      print("RECEIVED " + str(r) + " " + addr + ":" + str(port))
       data = udp.recv(4)
       data += udp.recv(1024)
       udp.send_start(addr, port)

@@ -60,7 +60,7 @@ class SocketClient:
       self.isSSL = False
       try:
         self.sock.connect((address, port))
-      except socket.error, e:
+      except socket.error:
         pass
     self.connecting = True
 
@@ -317,8 +317,8 @@ def test():
       server.run()
       sleep(3)
       server.run()
-      print server.is_connected(0)
-      print server.is_connected(1)
+      print(server.is_connected(0))
+      print(server.is_connected(1))
       sleep(3)
       server.close(0)
       server.close(1)
@@ -329,9 +329,9 @@ def test_client():
   while server.is_connecting(i):
     server.run()
   if not server.is_connected(i):
-    print "error"
+    print("error")
     return
-  print "connected"
+  print("connected")
   server.send(i, "test")
   server.run()
   server.close(i)

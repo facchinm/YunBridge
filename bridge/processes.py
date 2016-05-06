@@ -25,6 +25,7 @@
 ##
 ##    Copyright 2013 Arduino LLC (http://www.arduino.cc/)
 
+import subprocess
 from subprocess import Popen, PIPE
 
 from fcntl import fcntl, F_SETFL
@@ -44,7 +45,7 @@ class Processes:
       fcntl(proc.stderr.fileno(), F_SETFL, O_NONBLOCK)
       proc.buffered_out = ''
       proc.buffered_err = ''
-    except OSError, e:
+    except e:
       return None
     
     # Determine the next id to assign to process

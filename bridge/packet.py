@@ -25,10 +25,11 @@
 ##
 ##    Copyright 2013 Arduino LLC (http://www.arduino.cc/)
 
+import sys
 import os, tty, termios, select
 from contextlib import contextmanager
 from sys import stdin, stdout
-from subprocess import call
+#from subprocess import call
 
 @contextmanager
 def cbreak():
@@ -101,12 +102,12 @@ class RESET_Command:
     
   def run(self, data):
     if data[0] != 'X':
-      call(['/usr/bin/blink-start', '100'])
+      os.system('/usr/bin/blink-start 100')
       return chr(1)
     if data[1:4] != '100':
-      call(['/usr/bin/blink-start', '100'])
+      os.system('/usr/bin/blink-start 100')
       return chr(2)
-    call(['/usr/bin/blink-stop'])
+    os.system('/usr/bin/blink-stop')
     return chr(0) + '160' # send the actual bridge version
     
 class PacketReader:

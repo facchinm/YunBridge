@@ -34,7 +34,7 @@ class Files:
     # Open file
     try:
       file = open(filename, mode)
-    except IOError, e:
+    except IOError:
       return [e.errno, None]
     
     # Determine the next id to assign to file
@@ -59,7 +59,7 @@ class Files:
     file = self.files[id]
     try:
       return [0, file.read(maxlen)]
-    except IOError, e:
+    except IOError:
       return [e.errno, None]
 
   def write(self, id, data):
@@ -70,7 +70,7 @@ class Files:
       file.write(data)
       file.flush()
       return 0
-    except IOError, e:
+    except IOError:
       return e.errno
 
   def seek(self, id, pos):
@@ -80,7 +80,7 @@ class Files:
     try:
       file.seek(pos)
       return 0
-    except IOError, e:
+    except IOError:
       return e.errno
     
   def tell(self, id):
@@ -89,7 +89,7 @@ class Files:
     file = self.files[id]
     try:
       return [0, file.tell()]
-    except IOError, e:
+    except IOError:
       return [e.errno, None]
 
   def isDir(self, filename):
@@ -107,7 +107,7 @@ class Files:
       size = file.tell()
       file.seek(old_position, SEEK_SET)
       return [0, size]
-    except IOError, e:
+    except IOError:
       return [e.errno, None]
       
 files = Files()

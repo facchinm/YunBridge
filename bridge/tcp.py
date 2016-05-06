@@ -190,5 +190,5 @@ if __name__ == '__main__':
     bus.run()
     data = bus.read()
     if not data is None:
-      print data
+      print(data)
 

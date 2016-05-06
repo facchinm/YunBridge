@@ -27,7 +27,10 @@
 ##
 ##    Copyright 2013 Arduino LLC (http://www.arduino.cc/)
 
-import time
+#import sys
+#sys.path.pop(0)
+
+#import time
 
 import packet
 from packet import cbreak
@@ -50,7 +53,7 @@ class CommandProcessor:
       
   def process(self, data):
     if data == 'XXXXX':
-      print 'Goodbye...'
+      print ('Goodbye...')
       self.finished = True
       return ''
       
@@ -83,7 +86,7 @@ import sockets_udp
 sockets_udp.init(cp)
 
 pr = packet.PacketReader(cp)
-start_time = time.time()
+#start_time = time.time()
 with cbreak():
   #while time.time() - start_time < 100:
   while True:
