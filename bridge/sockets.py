@@ -48,20 +48,21 @@ class SocketClient:
     self.sock = sock
     self.connected = True
 
+  def connectSSL(self, address, port):
+    self.sock = socket.socket(AF_INET, SOCK_STREAM)
+    self.conn = self.context.wrap_socket(self.sock, server_hostname=address)
+    self.conn.connect((address, port))
+    self.isSSL = True
+    self.connecting = True
+
   def connect(self, address, port):
-    if port == 443:
-      self.sock = socket.socket(AF_INET, SOCK_STREAM)
-      self.conn = self.context.wrap_socket(self.sock, server_hostname=address)
-      self.conn.connect((address, 443))
-      self.isSSL = True
-    else:
-      self.sock = socket.socket(AF_INET, SOCK_STREAM)
-      self.sock.setblocking(0)
-      self.isSSL = False
-      try:
-        self.sock.connect((address, port))
-      except socket.error, e:
-        pass
+    self.sock = socket.socket(AF_INET, SOCK_STREAM)
+    self.sock.setblocking(0)
+    self.isSSL = False
+    try:
+      self.sock.connect((address, port))
+    except socket.error, e:
+      pass
     self.connecting = True
 
   def run(self):
@@ -155,6 +156,15 @@ class SocketServer:
     self.clients[self.next_id] = client
     return self.next_id
     
+  def connectSSL(self, address, port):
+    # Determine the next id to assign to socket
+    client = SocketClient()
+    client.connectSSL(address, port)
+    while self.next_id in self.clients:
+      self.next_id = (self.next_id + 1) % 256
+    self.clients[self.next_id] = client
+    return self.next_id
+
   def listen(self, address, port):
     if not self.server is None:
       self.server.close()
@@ -242,6 +252,15 @@ class CONNECT_Command:
     else:
       return chr(c)
 
+class CONNECTSSL_Command:
+  def run(self, data):
+    port = (ord(data[0]) << 8) + ord(data[1])
+    c = server.connectSSL(data[2:], port)
+    if c is None:
+      return ''
+    else:
+      return chr(c)
+
 class ACCEPT_Command:
   def run(self, data):
     c = server.accept()
@@ -302,6 +321,7 @@ def init(command_processor):
   command_processor.register('j', CLOSE_Command())
   command_processor.register('c', CONNECTING_Command())
   command_processor.register('C', CONNECT_Command())
+  command_processor.register('Z', CONNECTSSL_Command())
   command_processor.register('b', WRITE_TO_ALL_Command())
   command_processor.register_runner(server)
   
